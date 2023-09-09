@@ -1,5 +1,3 @@
-import streamlit as st
-st.title('MARK YOUR ATTENDANCE')
 import face_recognition
 
 # Load and encode known faces
@@ -28,4 +26,13 @@ face_encodings = face_recognition.face_encodings(unknown_image, face_locations)
 
 # Perform face recognition
 for face_encoding in face_encodings:
-    #
+    # Compare the face encoding to known face encodings
+    matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+    name = "Unknown"  # Default name if no match is found
+
+    # Use the first match (if any)
+    if True in matches:
+        first_match_index = matches.index(True)
+        name = known_face_names[first_match_index]
+
+    print(f"Found: {name}")
