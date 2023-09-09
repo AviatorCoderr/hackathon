@@ -4,7 +4,16 @@ import os
 import csv
 from PIL import Image
 from datetime import datetime
+import streamlit as st
 
+st.title("OpenCV and Streamlit Example")
+
+# Upload an image
+uploaded_image = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
+
+if uploaded_image:
+    image = cv2.imread(uploaded_image.name)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 def distance(v1, v2):
 	return np.sqrt(((v1-v2)**2).sum())
 
