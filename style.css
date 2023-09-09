@@ -1,18 +1,27 @@
 .navbar-brand{
-    color: white;
+    color: #0ef;
     font-weight:900;
     font-size: 2rem;
 }
+.navbar-brand:hover{
+  color: #0ef;
+}
 .navbar{
-    background-color: #331D2C;
+    background-color: black;
 }
 .contact:hover{
-  color: yellow;
+  color: #0ef;
 }
+
 .contact{
     color: white;
     font-weight: 500;
     font-size: 1.1rem;
     width: 150px;
 }
-
+@media (max-width: 800px){
+  .contactbtn{
+      position: relative;
+      left: 28px;
+  }
+}
