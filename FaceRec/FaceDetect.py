@@ -2,11 +2,11 @@ import cv2
 import numpy as np
 import os
 import csv
-from PIL import Image
 from datetime import datetime
 import streamlit as st
+
 def distance(v1, v2):
-return np.sqrt(((v1-v2)**2).sum())
+    return np.sqrt(((v1 - v2) ** 2).sum())
 
 def knn(train, test, k=5):
     dist = []
@@ -15,7 +15,7 @@ def knn(train, test, k=5):
         # Get the vector and label
         ix = train[i, :-1]
         iy = train[i, -1]
-        # Compute the distance from test point
+        # Compute the distance from the test point
         d = distance(test, ix)
         dist.append([d, iy])
     # Sort based on distance and get top k
@@ -25,102 +25,77 @@ def knn(train, test, k=5):
 
     # Get frequencies of each label
     output = np.unique(labels, return_counts=True)
-    # Find max frequency and corresponding label
+    # Find the max frequency and corresponding label
     index = np.argmax(output[1])
     return output[0][index]
 
+# Streamlit UI
+st.title("Face Recognition App")
 
-#Init Camera
-cap = cv2.VideoCapture(0)
+# Upload an image
+uploaded_image = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
 
-# Face Detection
-model = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
+if uploaded_image:
+    # Initialize camera and face detection model
+    cap = cv2.VideoCapture(0)
+    model = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 
-skip = 0
-dataset_path = './data/'
+    # Load saved face data
+    dataset_path = './data/'
+    face_data = []
+    labels = []
+    class_id = 0
+    names = {}
 
-face_data = []
-labels = []
+    for fx in os.listdir(dataset_path):
+        if fx.endswith('.npy'):
+            names[class_id] = fx[:-4]
+            print("Loaded " + fx)
 
-class_id = 0
-names = {}
+            data_item = np.load(dataset_path + fx)
+            face_data.append(data_item)
 
-# Data Preparation
+            target = class_id * np.ones((data_item.shape[0],))
+            class_id += 1
+            labels.append(target)
 
-f = open('Names.csv', 'w+', newline='')
-Inwriter = csv.writer(f)
+    face_dataset = np.concatenate(face_data, axis=0)
+    face_labels = np.concatenate(labels, axis=0).reshape((-1, 1))
 
-for fx in os.listdir(dataset_path):
-	if fx.endswith('.npy'):
+    trainset = np.concatenate((face_dataset, face_labels), axis=1)
 
-		#Create a mapping btw class_id and name
-		names[class_id] = fx[:-4]
-		print("Loaded "+fx)
+    while True:
+        ret, frame = cap.read()
+        if ret == False:
+            continue
 
-		# now = datetime.now()
-		# current_date = now.strftime("%Y-%m-%d")
-		# f = open(current_date+'.csv', 'w+', newline='')
-		# Inwriter = csv.writer(f)
-		# current_time = now.strftime("%H-%M-%S")
-		# Inwriter.writerow([fx, current_time])
+        faces = model.detectMultiScale(frame, 1.3, 5)
+        if len(faces) == 0:
+            continue
 
+        for face in faces:
+            x, y, w, h = face
 
+            # Get the face ROI
+            offset = 10
+            face_section = frame[y - offset:y + h + offset, x - offset:x + w + offset]
+            face_section = cv2.resize(face_section, (100, 100))
 
-		data_item = np.load(dataset_path+fx)
-		face_data.append(data_item)
+            # Predicted Label
+            out = knn(trainset, face_section.flatten())
 
-		#Create Labels for the class
-		target = class_id*np.ones((data_item.shape[0],))
-		class_id += 1
-		labels.append(target)
+            # Display on the screen the name and rectangle around it
+            pred_name = names[int(out)]
 
-face_dataset = np.concatenate(face_data, axis=0)
-face_labels = np.concatenate(labels, axis=0).reshape((-1, 1))
+            cv2.putText(frame, pred_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 2, cv2.LINE_AA)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 225, 0), 2)
 
-print(face_dataset.shape)
-print(face_labels.shape)
+        # Display the processed frame in Streamlit
+        st.image(frame, channels="BGR", use_column_width=True)
 
-trainset = np.concatenate((face_dataset, face_labels), axis=1)
-print(trainset.shape)
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            break
 
-my_set = {}
-
-while True:
-	ret, frame = cap.read()
-	if ret == False:
-		continue
-
-	faces = model.detectMultiScale(frame,1.3, 5)
-	if(len(faces) == 0):
-		continue
-
-	for face in faces:
-		x, y, w, h = face
-
-		#Get the face ROI
-		offset = 10
-		face_section = frame[y-offset:y+h+offset, x-offset:x+w+offset]
-		face_section = cv2.resize(face_section, (100, 100))
-
-		#Predicted Label
-		out = knn(trainset, face_section.flatten())
-
-		#Display on the screen the name and rectangle around it
-		pred_name = names[int(out)]
-		my_set.add(pred_name)
-
-
-		cv2.putText(frame, pred_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 0), 2, cv2.LINE_AA)
-		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 225, 0), 2)
-
-	key = cv2.waitKey(1) & 0xFF
-	if key == ord('q'):
-		break
-
-now = datetime.now()
-current_date = now.strftime("%Y-%m-%d")
-current_time = now.strftime("%H-%M-%S")
-Inwriter.writerow([my_set, current_time])
-
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
