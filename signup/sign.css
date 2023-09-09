@@ -1,0 +1,58 @@
+html,
+body {
+  height: 100%;
+}
+.hand{
+  font-size: 50px;
+}
+.text{
+  color: aliceblue;
+  font-weight: 150px;
+  text-shadow: 0px 0px 100px rgba(231, 239, 240, 0.5);
+}
+body {
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #331D2C;
+}
+.signin{
+  font-size: large;
+  font-weight: 600;
+  box-shadow: 0 0 10px 5px rgba(238, 237, 235, 0.7);
+}
+
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+
+.form-signin .checkbox {
+  font-weight: 400;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+html {
+  --sl: calc(2em + 1px) calc(3em + -.5px),
+  			transparent calc(3em + .5px);
+  background: radial-gradient(#fff 1em, #000 calc(1em + 1px) 2em, #fff var(--sl)) 4.2426406871em 4.2426406871em, repeating-conic-gradient(#000 0% 25%, transparent 0% 50%) 2.1213203436em 2.1213203436em, radial-gradient(#000 1em, #fff calc(1em + 1px) 2em, #000 var(--sl));
+  background-size: 8.4852813742em 8.4852813742em, 16.9705627485em 16.9705627485em;
+  background-blend-mode: lighten;
+}

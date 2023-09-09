@@ -1,0 +1,18 @@
+.navbar-brand{
+    color: white;
+    font-weight:900;
+    font-size: 2rem;
+}
+.navbar{
+    background-color: #331D2C;
+}
+.contact:hover{
+  color: yellow;
+}
+.contact{
+    color: white;
+    font-weight: 500;
+    font-size: 1.1rem;
+    width: 150px;
+}
+
